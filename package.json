@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx src/bot.ts",
+    "dev": "cross-env NODE_EXTRA_CA_CERTS=./certs/russian-ca-bundle.pem tsx src/app/index.ts",
     "build": "tsc",
-    "start": "node dist/bot.js"
+    "start": "cross-env NODE_EXTRA_CA_CERTS=./certs/russian-ca-bundle.pem node dist/app/index.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.4.1",
+    "cross-env": "^10.1.0",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }

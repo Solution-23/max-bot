@@ -1,0 +1,1 @@
+export { Bot, Context } from '@maxhub/max-bot-api';
