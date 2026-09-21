@@ -2,6 +2,7 @@ import { config } from '../infrastructure/config';
 import { createDatabase } from '../infrastructure/db/sqlite';
 import { UserRepository } from '../repositories/user.repository';
 import { StartUseCase } from '../use-case/start.use-case';
+import { SetAdminUseCase } from '../use-case/set-admin.use-case';
 import { InitBot } from '../adapters/bot';
 
 async function main() {
@@ -9,6 +10,13 @@ async function main() {
     const db = createDatabase(config.DB_PATH);
     const userRepository = new UserRepository(db);
     const startUseCase = new StartUseCase(userRepository);
+    const setAdminUseCase = new SetAdminUseCase(userRepository);
+
+    if (config.ADMIN_ID) {
+        setAdminUseCase.execute(config.ADMIN_ID);
+        console.log(`Админ назначен: ${config.ADMIN_ID}`);
+    }
+
     const bot = InitBot(config.BOT_TOKEN, startUseCase);
 
     console.log('Запускаю бота...');
