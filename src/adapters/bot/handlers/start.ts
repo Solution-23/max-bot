@@ -1,3 +1,4 @@
+import { GREETING } from '../messages';
 import { Bot } from '../../../entity/bot.entity';
 import { StartUseCase } from '../../../use-case/start.use-case';
 
@@ -8,6 +9,6 @@ export function registerBotStartedHandler(bot: Bot, startUseCase: StartUseCase):
             startUseCase.execute({ id: user.user_id, username: user.username });
         }
 
-        await ctx.reply('Привет! Я простой MAX-бот.\n\nДоступные команды:\n/start — запустить бота\n/help — список команд');
+        await GREETING
     });
 }

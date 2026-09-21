@@ -1,11 +1,16 @@
+import { registerIdsCommand } from './ids';
 import { Bot } from '../../../entity/bot.entity';
-import { StartUseCase } from '../../../use-case/start.use-case';
-import { registerStartCommand } from './start';
+import { BotDeps } from '../deps';
+import { registerAllUsersCommand } from './allusers';
 import { registerHelpCommand } from './help';
+import { registerNotifyCommand } from './notify';
+import { registerStartCommand } from './start';
 
-export function registerCommands(bot: Bot, startUseCase: StartUseCase): void {
-    registerStartCommand(bot, startUseCase);
-    registerHelpCommand(bot);
 
-    // Админские команды (allusers, notify, ids) будут подключены здесь позже
+export function registerCommands(bot: Bot, deps: BotDeps): void {
+  registerStartCommand(bot, deps.startUseCase);
+  registerHelpCommand(bot, deps);
+  registerAllUsersCommand(bot, deps);
+  registerNotifyCommand(bot, deps);
+  registerIdsCommand(bot, deps);
 }

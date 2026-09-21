@@ -1,17 +1,18 @@
 import { Bot } from '../../entity/bot.entity';
-import { StartUseCase } from '../../use-case/start.use-case';
 import { registerCommands } from './commands';
+import { BotDeps } from './deps';
 import { registerHandlers } from './handlers';
 
-export function InitBot(token: string, startUseCase: StartUseCase): Bot {
-    const bot = new Bot(token);
+export function InitBot(token: string, deps: BotDeps): Bot {
+  const bot = new Bot(token);
 
-    registerCommands(bot, startUseCase);
-    registerHandlers(bot, startUseCase);
+  // Команды регистрируем раньше общих обработчиков
+  registerCommands(bot, deps);
+  registerHandlers(bot, deps.startUseCase);
 
-    bot.catch((err) => {
-        console.error('Ошибка при обработке обновления:', err);
-    });
+  bot.catch((err) => {
+    console.error('Ошибка при обработке обновления:', err);
+  });
 
-    return bot;
+  return bot;
 }

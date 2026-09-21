@@ -1,3 +1,5 @@
+import { CheckAdminUseCase } from '../use-case/check-admin.use-case';
+import { GetAllUsersUseCase } from '../use-case/get-all-users.use-case';
 import { config } from '../infrastructure/config';
 import { createDatabase } from '../infrastructure/db/sqlite';
 import { UserRepository } from '../repositories/user.repository';
@@ -17,7 +19,12 @@ async function main() {
         console.log(`Админ назначен: ${config.ADMIN_ID}`);
     }
 
-    const bot = InitBot(config.BOT_TOKEN, startUseCase);
+    const bot = InitBot(config.BOT_TOKEN, {
+  startUseCase,
+  checkAdminUseCase: new CheckAdminUseCase(userRepository),
+  getAllUsersUseCase: new GetAllUsersUseCase(userRepository),
+  notifyDelayMs: config.NOTIFY_DELAY_MS,
+});
 
     console.log('Запускаю бота...');
 
