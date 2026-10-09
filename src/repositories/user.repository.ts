@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { z } from 'zod';
-import { User, UserOptions } from '../entity/user.entity';
+import { User, UserOptions, UserRow } from '../entity/user.entity';
 
 const userOptionsSchema = z.object({
     role: z.union([z.literal('admin'), z.literal('user')]).optional(),
@@ -21,7 +21,7 @@ export class UserRepository {
         this.findAllStmt = this.db.prepare('SELECT * FROM users');
     }
 
-    private mapToUser(row: any): User {
+    private mapToUser(row: UserRow): User {
         return {
             id: row.id,
             username: row.username,
@@ -41,7 +41,7 @@ export class UserRepository {
     }
 
     findById(id: number): User | undefined {
-        const row = this.findByIdStmt.get(id);
+        const row = this.findByIdStmt.get(id) as UserRow | undefined;
         return row ? this.mapToUser(row) : undefined;
     }
 
@@ -75,7 +75,7 @@ export class UserRepository {
     }
 
     findAll(): User[] {
-        const rows = this.findAllStmt.all();
+        const rows = this.findAllStmt.all() as UserRow[];
         return rows.map(row => this.mapToUser(row));
     }
 }

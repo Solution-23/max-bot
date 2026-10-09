@@ -9,6 +9,6 @@ export function registerBotStartedHandler(bot: Bot, startUseCase: StartUseCase):
             startUseCase.execute({ id: user.user_id, username: user.username });
         }
 
-        await GREETING
+        await ctx.reply(GREETING);
     });
 }
