@@ -1,30 +1,20 @@
-import { CheckAdminUseCase } from '../use-case/check-admin.use-case';
-import { GetAllUsersUseCase } from '../use-case/get-all-users.use-case';
 import { config } from '../infrastructure/config';
-import { createDatabase } from '../infrastructure/db/sqlite';
-import { UserRepository } from '../repositories/user.repository';
-import { StartUseCase } from '../use-case/start.use-case';
-import { SetAdminUseCase } from '../use-case/set-admin.use-case';
 import { InitBot } from '../adapters/bot';
+import { DI } from '../di';
 
 async function main() {
-    // Сборка зависимостей (позже переедет в di/)
-    const db = createDatabase(config.DB_PATH);
-    const userRepository = new UserRepository(db);
-    const startUseCase = new StartUseCase(userRepository);
-    const setAdminUseCase = new SetAdminUseCase(userRepository);
-
     if (config.ADMIN_ID) {
-        setAdminUseCase.execute(config.ADMIN_ID);
+        DI.useCases.setAdmin.execute(config.ADMIN_ID);
         console.log(`Админ назначен: ${config.ADMIN_ID}`);
     }
 
     const bot = InitBot(config.BOT_TOKEN, {
-  startUseCase,
-  checkAdminUseCase: new CheckAdminUseCase(userRepository),
-  getAllUsersUseCase: new GetAllUsersUseCase(userRepository),
-  notifyDelayMs: config.NOTIFY_DELAY_MS,
-});
+        startUseCase: DI.useCases.start,
+        checkAdminUseCase: DI.useCases.checkAdmin,
+        getAllUsersUseCase: DI.useCases.getAllUsers,
+        notifyDelayMs: config.NOTIFY_DELAY_MS,
+        utils: DI.utils,
+    });
 
     console.log('Запускаю бота...');
 
@@ -37,7 +27,7 @@ async function main() {
             if (attempt < 3) {
                 await new Promise(resolve => setTimeout(resolve, 3000));
             } else {
-                db.close();
+                DI.repositories.db.close();
                 process.exit(1);
             }
         }
@@ -45,13 +35,13 @@ async function main() {
 
     process.on('SIGINT', () => {
         bot.stopPolling();
-        db.close();
+        DI.repositories.db.close();
         process.exit(0);
     });
 
     process.on('SIGTERM', () => {
         bot.stopPolling();
-        db.close();
+        DI.repositories.db.close();
         process.exit(0);
     });
 }
