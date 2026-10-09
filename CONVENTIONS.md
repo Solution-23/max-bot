@@ -13,5 +13,9 @@
 - infrastructure/ — config (Zod) и db. Ничего не знают о бизнес-логике.
 - adapters/bot/ — единственное место, где используется @maxhub/max-bot-api.
   Переводит Context в простые данные и вызывает use-case.
-- Зависимости собираются в app/index.ts, а позже переедут в di/.
+- Зависимости собираются в di/, app/index.ts только берёт их из DI.
 - Данные из внешних источников (env, JSON из БД) проверяются через Zod.
+- Структура: entity, use-case, repositories, infrastructure, adapters/bot, app, di, utils. Папку cli не трогать.
+- di/ — единая точка сборки зависимостей: index.ts, repositories/, services/, use-case/, utils/. Слой app берёт всё из DI.
+- utils/ — общие утилиты, реэкспорт через src/utils/index.ts.
+- Сообщения боту отправляются только через ctx.reply(...).
