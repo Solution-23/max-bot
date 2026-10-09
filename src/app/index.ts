@@ -1,6 +1,7 @@
 import { config } from '../infrastructure/config';
 import { InitBot } from '../adapters/bot';
 import { DI } from '../di';
+import { db } from '../di/repositories';
 
 async function main() {
     if (config.ADMIN_ID) {
@@ -27,7 +28,7 @@ async function main() {
             if (attempt < 3) {
                 await new Promise(resolve => setTimeout(resolve, 3000));
             } else {
-                DI.repositories.db.close();
+                db.close();
                 process.exit(1);
             }
         }
@@ -35,13 +36,13 @@ async function main() {
 
     process.on('SIGINT', () => {
         bot.stopPolling();
-        DI.repositories.db.close();
+        db.close();
         process.exit(0);
     });
 
     process.on('SIGTERM', () => {
         bot.stopPolling();
-        DI.repositories.db.close();
+        db.close();
         process.exit(0);
     });
 }
