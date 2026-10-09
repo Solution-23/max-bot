@@ -6,7 +6,7 @@
 
 | Команда | Кому доступна | Что делает |
 | --- | --- | --- |
-| `/start` | всем | Сохраняет пользователя и присылает приветствие |
+| `/start` | всем | Сохраняет пользователя и приветствует по имени: новому «Добро пожаловать, <имя>!», вернувшемуся «С возвращением, <имя>!» |
 | `/help` | всем | Список команд (администратору показываются и админские) |
 | `/allusers` | админу | Количество пользователей и список: id и username |
 | `/ids` | админу | Присылает файл `ids.txt` с id всех пользователей |
@@ -92,7 +92,7 @@ npm run dev
 
 ```
 src/
-├── entity/              # типы: User; реэкспорт Bot и Context из библиотеки
+├── entity/              # типы: User, UserRow; реэкспорт Bot и Context из библиотеки
 ├── use-case/            # бизнес-логика: start, set-admin, check-admin, get-all-users
 ├── repositories/        # весь SQL (better-sqlite3): user.repository
 ├── infrastructure/
@@ -104,16 +104,21 @@ src/
 │   ├── deps.ts          # набор зависимостей бота
 │   ├── messages.ts      # тексты ответов
 │   └── index.ts         # InitBot: создание бота и регистрация всего
-└── app/index.ts         # точка входа: сборка зависимостей, запуск, остановка
+├── di/                  # сборка зависимостей: repositories (БД), services, use-case, utils
+├── utils/               # общие утилиты (splitLines)
+└── app/index.ts         # точка входа: запуск, остановка
 ```
 
 Зависимости направлены только внутрь:
 
 ```mermaid
 flowchart LR
-    APP[app] --> ADP[adapters/bot]
-    ADP --> UC[use-case]
-    UC --> REPO[repositories]
+    APP[app] --> DI[di]
+    APP --> ADP[adapters/bot]
+    DI --> UC[use-case]
+    DI --> REPO[repositories]
+    ADP --> UC
+    UC --> REPO
     UC --> ENT[entity]
     REPO --> ENT
     REPO --> DB[(SQLite)]
@@ -125,11 +130,11 @@ flowchart LR
 - `adapters/bot` переводит события MAX в вызовы use-case;
 - данные из внешних источников (env, JSON из БД) проверяются через Zod.
 
-Зависимости пока собираются вручную в `app/index.ts`.
+Зависимости собираются в `di/` (`DI = { utils, repositories, services, useCases }`), а `app/index.ts` только берёт их оттуда.
 
 ### Работа приложения
 
-- при старте создаётся база, назначается администратор и запускается бот;
+- при запуске `di` создаёт базу и репозитории, затем назначается администратор и запускается бот;
 - запуск делает до трёх попыток с паузой 3 секунды;
 - по `SIGINT` и `SIGTERM` бот останавливает получение обновлений и закрывает базу.
 
